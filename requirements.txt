@@ -1,0 +1,6 @@
+opencv-python
+pygame
+scikit-learn
+numpy
+matplotlib
+seaborn

@@ -1,0 +1,6 @@
+.venv/
+videos/*
+**/*.jpg
+data/bak/*
+.DS_Store
+*.pkl
