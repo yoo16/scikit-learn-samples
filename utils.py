@@ -6,9 +6,9 @@ def get_traning_data_dir(name):
     path = os.path.join(current_dir, "data", name)
     return path
 
-def get_test_image_dir():
+def get_test_image_dir(type):
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(current_dir, "data", "test")
+    path = os.path.join(current_dir, "data", "test", type)
     return path
 
 

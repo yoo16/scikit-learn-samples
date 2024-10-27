@@ -1,6 +1,8 @@
-opencv-python
 pygame
 scikit-learn
-numpy
-matplotlib
 seaborn
+numpy
+scipy
+opencv-python
+matplotli
+pandas

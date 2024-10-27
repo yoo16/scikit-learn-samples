@@ -4,21 +4,26 @@ import cv2
 import matplotlib.pyplot as plt
 import utils
 
+
 def predict_image(model, image_path):
-    """画像の予測を行い、結果を返す"""
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if img is None:
         print(f"Error: '{image_path}' could not be loaded.")
         return None
 
+    # 画像のリサイズと1次元配列への変換
     resized = cv2.resize(img, (64, 64)).flatten().reshape(1, -1)
+
+    # 予測の実行
     prediction = model.predict(resized)
     label = 'P' if prediction == 1 else 'N'
     return label
 
+
 def show_predictions(model, folder_path):
     """フォルダ内の画像を順に処理し、予測結果を表示"""
-    image_files = [f for f in os.listdir(folder_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+    image_files = [f for f in os.listdir(
+        folder_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
 
     if not image_files:
         print(f"No images found in '{folder_path}'")
@@ -41,15 +46,16 @@ def show_predictions(model, folder_path):
 
     plt.show()
 
+
 # モデルのパスを取得して読み込み
-model_name = "svm_crow_classifier.pkl"
-loaded_model = utils.load_model(model_name)
+model_name = "crow_classifier.pkl"
+model = utils.load_model(model_name)
 
 # data/test/フォルダのパス
-test_folder = utils.get_test_image_dir()
+test_folder = utils.get_test_image_dir("crow")
 
 # フォルダ内の画像を処理し、結果を表示
 if os.path.exists(test_folder):
-    show_predictions(loaded_model, test_folder)
+    show_predictions(model, test_folder)
 else:
     print(f"Error: The folder '{test_folder}' does not exist.")

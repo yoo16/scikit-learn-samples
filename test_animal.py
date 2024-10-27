@@ -1,53 +1,76 @@
 import os
-import pickle
 import cv2
-import matplotlib.pyplot as plt
+import numpy as np
+import pickle
 import utils
 
+def load_model(model_name):
+    """モデルをpickleファイルからロードする"""
+    model_path = utils.get_model_path(model_name)
+    if not os.path.exists(model_path):
+        print(f"Error: The model file '{model_path}' does not exist.")
+        exit(1)
+
+    with open(model_path, 'rb') as f:
+        model = pickle.load(f)
+    print(f"Model loaded from '{model_path}'")
+    return model
+
 def predict_image(model, image_path):
+    """画像を予測してクラス名と確率を返す"""
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if img is None:
         print(f"Error: '{image_path}' could not be loaded.")
-        return None
+        return None, None
 
+    # 画像のリサイズと1次元配列への変換
     resized = cv2.resize(img, (64, 64)).flatten().reshape(1, -1)
-    prediction = model.predict(resized)
-    label = 'P' if prediction == 1 else 'N'
-    return label
 
-def show_predictions(model, folder_path):
-    image_files = [f for f in os.listdir(folder_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+    # 予測の実行
+    probabilities = model.predict_proba(resized)[0]
+    prediction = np.argmax(probabilities)
+    class_names = ["dog", "cat", "bird"]
 
-    if not image_files:
-        print(f"No images found in '{folder_path}'")
+    return class_names[prediction], probabilities[prediction]
+
+def visualize_prediction(image_path, prediction, probability):
+    """画像に予測結果を描画し表示する"""
+    img = cv2.imread(image_path)
+    if img is None:
+        print(f"Error: Failed to load '{image_path}'")
         return
 
-    num_images = len(image_files)
-    fig, axes = plt.subplots(1, num_images, figsize=(5 * num_images, 5))
+    # 予測結果と確率を描画
+    label = f"{prediction}: {probability * 100:.2f}%"
+    cv2.putText(img, label, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-    # 各画像に対して予測を実行し、結果を表示
-    for i, image_file in enumerate(image_files):
-        image_path = os.path.join(folder_path, image_file)
-        label = predict_image(model, image_path)
+    # 画像を表示してESCキーを待機
+    cv2.imshow(f"{os.path.basename(image_path)}", img)
+    key = cv2.waitKey(0) & 0xFF  # キー入力を取得
 
-        # 画像を表示
-        ax = axes[i] if num_images > 1 else axes  # 画像が1枚の場合も対応
-        img = cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_BGR2RGB)
-        ax.imshow(img)
-        ax.set_title(f"{image_file}\nPrediction: {label}", fontsize=10)
-        ax.axis('off')
+    # ESCキーが押されたら終了
+    if key == 27:  # ESCキーのASCIIコードは27
+        print("ESC pressed. Exiting...")
+        cv2.destroyAllWindows()
+        exit(0)  # プログラム全体を終了
 
-    plt.show()
+    cv2.destroyAllWindows()
 
-# モデルのパスを取得して読み込み
+def test_images(model_name, folder):
+    """フォルダ内のすべての画像をテストし、結果を表示"""
+    model = load_model(model_name)
+
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        if filename.lower().endswith((".jpg", ".jpeg", ".png")):  # 画像ファイルのみ対象
+            prediction, probability = predict_image(model, file_path)
+            if prediction is not None:
+                print(f"Image: {filename} --> Prediction: {prediction} ({probability * 100:.2f}%)")
+                visualize_prediction(file_path, prediction, probability)  # 可視化
+        else:
+            print(f"Skipping non-image file: {filename}")
+
+# --- メイン処理 ---
+test_folder = utils.get_test_image_dir("animal")  # テストフォルダを取得
 model_name = "animal_classifier.pkl"
-loaded_model = utils.load_model(model_name)
-
-# data/test/フォルダのパス
-test_folder = utils.get_test_image_dir()
-
-# フォルダ内の画像を処理し、結果を表示
-if os.path.exists(test_folder):
-    show_predictions(loaded_model, test_folder)
-else:
-    print(f"Error: The folder '{test_folder}' does not exist.")
+test_images(model_name, test_folder)

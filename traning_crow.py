@@ -88,7 +88,7 @@ def plot_roc_curve(y_test, y_prob):
 
 
 # モデルの保存
-model_name = "svm_crow_classifier.pkl"
+model_name = "crow_classifier.pkl"
 model_path = utils.get_model_path(model_name)
 with open(model_path, 'wb') as f:
     pickle.dump(model, f)

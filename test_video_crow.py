@@ -13,7 +13,7 @@ if not os.path.exists(video_path):
     exit(1)
 
 # scikit-learnモデルの読み込み
-model_name = "svm_crow_classifier.pkl"
+model_name = "crow_classifier.pkl"
 model = utils.load_model(model_name)
 
 cap = cv2.VideoCapture(video_path)

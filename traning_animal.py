@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import pickle
+import utils
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
@@ -11,7 +12,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 def load_images_from_folder(base_folder):
     images = []
     labels = []
-    label_dict = {"dogs": 0, "cats": 1, "birds": 2}  # クラスとラベルの対応
+    label_dict = {"dogs": 0, "cats": 1, "birds": 2}
 
     for label_name, label in label_dict.items():
         class_folder = os.path.join(base_folder, label_name)
@@ -74,11 +75,13 @@ def plot_confusion_matrix(conf_matrix, class_names):
     plt.show()
 
 # 混同行列のプロット
+# plot_confusion_matrix(conf_matrix, ["dogs", "cats", "birds"])
 plot_confusion_matrix(conf_matrix, ["dogs", "cats", "birds"])
 
-# --- モデルの保存 ---
-model_name = os.path.join(".", "animal_classifier.pkl")  # モデルの保存先パス
-with open(model_name, "wb") as f:
+# モデルの保存
+model_name = "animal_classifier.pkl"
+model_path = utils.get_model_path(model_name)
+with open(model_path, 'wb') as f:
     pickle.dump(model, f)
 
 print(f"Model saved to {model_name}")
