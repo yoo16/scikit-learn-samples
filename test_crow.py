@@ -3,7 +3,7 @@ import pickle
 import cv2
 import matplotlib.pyplot as plt
 import utils
-
+import math
 
 def predict_image(model, image_path):
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -19,8 +19,7 @@ def predict_image(model, image_path):
     label = 'P' if prediction == 1 else 'N'
     return label
 
-
-def show_predictions(model, folder_path):
+def show_predictions(model, folder_path, images_per_row=5):
     image_files = [f for f in os.listdir(
         folder_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
 
@@ -29,7 +28,11 @@ def show_predictions(model, folder_path):
         return
 
     num_images = len(image_files)
-    fig, axes = plt.subplots(1, num_images, figsize=(5 * num_images, 5))
+    num_rows = math.ceil(num_images / images_per_row)  # 行数を計算
+
+    # 画像のサイズ調整: 全体の幅と高さを調整
+    fig, axes = plt.subplots(num_rows, images_per_row, figsize=(2 * images_per_row, 2 * num_rows))
+    axes = axes.flatten()  # 1次元にしてループで扱いやすくする
 
     # 各画像に対して予測を実行し、結果を表示
     for i, image_file in enumerate(image_files):
@@ -37,14 +40,17 @@ def show_predictions(model, folder_path):
         label = predict_image(model, image_path)
 
         # 画像を表示
-        ax = axes[i] if num_images > 1 else axes  # 画像が1枚の場合も対応
         img = cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_BGR2RGB)
-        ax.imshow(img)
-        ax.set_title(f"{image_file}\nPrediction: {label}", fontsize=10)
-        ax.axis('off')
+        axes[i].imshow(img)
+        axes[i].set_title(f"{image_file}\nPrediction: {label}", fontsize=8)  # 小さめのフォント
+        axes[i].axis('off')
 
+    # 使われなかった軸を非表示にする
+    for j in range(i + 1, len(axes)):
+        axes[j].axis('off')
+
+    plt.tight_layout()
     plt.show()
-
 
 # モデルのパスを取得して読み込み
 model_name = "crow_classifier.pkl"
@@ -55,6 +61,6 @@ test_folder = utils.get_test_image_dir("crow")
 
 # フォルダ内の画像を処理し、結果を表示
 if os.path.exists(test_folder):
-    show_predictions(model, test_folder)
+    show_predictions(model, test_folder, images_per_row=5)  # 1行に5枚表示
 else:
     print(f"Error: The folder '{test_folder}' does not exist.")
