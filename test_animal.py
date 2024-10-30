@@ -5,7 +5,6 @@ import pickle
 import utils
 
 def load_model(model_name):
-    """モデルをpickleファイルからロードする"""
     model_path = utils.get_model_path(model_name)
     if not os.path.exists(model_path):
         print(f"Error: The model file '{model_path}' does not exist.")
@@ -17,7 +16,6 @@ def load_model(model_name):
     return model
 
 def predict_image(model, image_path):
-    """画像を予測してクラス名と確率を返す"""
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if img is None:
         print(f"Error: '{image_path}' could not be loaded.")
@@ -34,7 +32,6 @@ def predict_image(model, image_path):
     return class_names[prediction], probabilities[prediction]
 
 def visualize_prediction(image_path, prediction, probability):
-    """画像に予測結果を描画し表示する"""
     img = cv2.imread(image_path)
     if img is None:
         print(f"Error: Failed to load '{image_path}'")
@@ -57,7 +54,6 @@ def visualize_prediction(image_path, prediction, probability):
     cv2.destroyAllWindows()
 
 def test_images(model_name, folder):
-    """フォルダ内のすべての画像をテストし、結果を表示"""
     model = load_model(model_name)
 
     for filename in os.listdir(folder):
