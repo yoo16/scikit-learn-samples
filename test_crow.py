@@ -21,7 +21,6 @@ def predict_image(model, image_path):
 
 
 def show_predictions(model, folder_path):
-    """フォルダ内の画像を順に処理し、予測結果を表示"""
     image_files = [f for f in os.listdir(
         folder_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
 
