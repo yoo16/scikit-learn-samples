@@ -61,37 +61,40 @@ print(conf_matrix)
 accuracy = accuracy_score(y_test, y_pred)
 print(f'Accuracy: {accuracy * 100:.2f}%')
 
-# --- 混同行列の視覚化 ---
-def plot_confusion_matrix(conf_matrix):
-    plt.figure(figsize=(6, 5))
-    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', cbar=False)
-    plt.xlabel('Predicted Label')
-    plt.ylabel('True Label')
-    plt.title('Confusion Matrix')
-    plt.show()
-
-# --- ROC曲線のプロット ---
-def plot_roc_curve(y_test, y_prob):
-    fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+# --- 混同行列とROC曲線を1つのグラフにまとめる ---
+def plot_combined_graph(conf_matrix, y_test, y_prob):
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
     roc_auc = auc(fpr, tpr)
 
-    plt.figure(figsize=(6, 5))
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
-    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic (ROC)')
-    plt.legend(loc="lower right")
-    plt.show()
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
+    # 混同行列のプロット
+    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', cbar=False,
+                xticklabels=['negative', 'positive'], yticklabels=['negative', 'positive'], ax=axes[0])
+    axes[0].set_xlabel('Predicted Label')
+    axes[0].set_ylabel('True Label')
+    axes[0].set_title('Confusion Matrix')
+
+    # ROC曲線のプロット
+    axes[1].plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (AUC = {roc_auc:.2f})')
+    axes[1].plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')  # ランダム分類器の基準線
+    axes[1].set_xlim([0.0, 1.0])
+    axes[1].set_ylim([0.0, 1.05])
+    axes[1].set_xlabel('False Positive Rate')
+    axes[1].set_ylabel('True Positive Rate')
+    axes[1].set_title('ROC Curve')
+    axes[1].legend(loc="lower right")
+
+    # レイアウト調整と表示
+    plt.tight_layout()
+    plt.show()
 
 # モデルの保存
 model_name = "crow_classifier.pkl"
 model_path = utils.get_model_path(model_name)
 with open(model_path, 'wb') as f:
     pickle.dump(model, f)
+print(f"Model saved to {model_path}")
 
-# plot_confusion_matrix(conf_matrix)
-# plot_roc_curve(y_test, y_prob)
+# 混同行列とROC曲線のプロットを実行
+plot_combined_graph(conf_matrix, y_test, y_prob)
