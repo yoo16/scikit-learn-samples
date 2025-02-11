@@ -40,7 +40,7 @@ X = np.vstack((X_pos, X_neg))
 y = np.hstack((y_pos, y_neg))
 
 # 訓練データとテストデータに分割
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 # SVMモデルの作成と訓練
 model = SVC(kernel='linear', probability=True)
